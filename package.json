@@ -1,7 +1,7 @@
 {
 	"name": "brand-studio",
 	"private": true,
-	"version": "1.4.0",
+	"version": "0.1.0",
 	"description": "SYL.AILABS desktop screen recorder and video editor.",
 	"type": "module",
 	"packageManager": "npm@10.9.4",

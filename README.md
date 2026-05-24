@@ -49,8 +49,8 @@ release/<version>/Brand Studio-Windows-<version>-Setup.exe
 GitHub Actions publishes an unsigned Windows installer when a version tag is pushed:
 
 ```bash
-git tag v1.4.0
-git push origin v1.4.0
+git tag v0.1.0
+git push origin v0.1.0
 ```
 
 The workflow uploads the installer to the matching GitHub Release. Code signing should be configured before public distribution to avoid Windows trust warnings.
