@@ -10,7 +10,7 @@ const RENDERER_DIST = path.join(APP_ROOT, "dist");
 const HEADLESS = process.env["HEADLESS"] === "true";
 const APP_ICON_PATH = path.join(
 	process.defaultApp ? path.join(__dirname, "..", "public") : RENDERER_DIST,
-	"logo-home-transparent.png",
+	"app-icon-ufo.png",
 );
 
 // Asset base URL for renderer (wallpapers, etc.). Packaged: extraResources copies

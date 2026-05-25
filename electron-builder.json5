@@ -81,7 +81,7 @@
     "target": [
       "nsis"
     ],
-    "icon": "public/logo-home-transparent.png",
+    "icon": "public/app-icon-ufo.png",
     "artifactName": "${productName}-Windows-${version}-Setup.${ext}",
     "extraResources": [
       {
