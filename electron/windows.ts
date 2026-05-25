@@ -52,6 +52,8 @@ export function createWorkspaceWindow(): BrowserWindow {
 			additionalArguments: [ASSET_BASE_URL_ARG],
 			nodeIntegration: false,
 			contextIsolation: true,
+			// The Vite dev origin previews persisted local recordings; packaged windows load from file.
+			webSecurity: !VITE_DEV_SERVER_URL,
 			backgroundThrottling: false,
 		},
 	});

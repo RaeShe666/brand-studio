@@ -347,14 +347,14 @@ export function LaunchWindow() {
 				console.error("Failed to set current video path:", setVideoPathResult);
 				return;
 			}
-			await window.electronAPI.switchToEditor();
+			await window.electronAPI.openCompletedRecording();
 		}
 	};
 
 	const openProjectFile = async () => {
 		const result = await nativeBridgeClient.project.loadProjectFile();
 		if (result.canceled || !result.success) return;
-		await window.electronAPI.switchToEditor();
+		await window.electronAPI.openCompletedRecording();
 	};
 
 	const sendHudOverlayHide = () => {

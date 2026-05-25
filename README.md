@@ -8,7 +8,7 @@ The app is built with Electron, React, Vite, and electron-builder. Its recording
 
 - Record a screen, window, or region.
 - Capture cursor movement, clicks, system audio, microphone, and webcam.
-- Edit recordings with zoom, backgrounds, annotations, crop, speed, and blur tools.
+- Continue the Screen Studio migration from recording preview into zoom, crop, speed, and export tools.
 - Export MP4 or GIF.
 
 ## Download And Install
@@ -17,12 +17,12 @@ The app is built with Electron, React, Vite, and electron-builder. Its recording
 
 The current Windows release is available from GitHub:
 
-- [Download Brand Studio v0.2.1 for Windows](https://github.com/RaeShe666/brand-studio/releases/download/v0.2.1/Brand.Studio-Windows-0.2.1-Setup.exe)
+- [Download Brand Studio v0.2.2 for Windows](https://github.com/RaeShe666/brand-studio/releases/download/v0.2.2/Brand.Studio-Windows-0.2.2-Setup.exe)
 - [View all releases](https://github.com/RaeShe666/brand-studio/releases)
 
 To install:
 
-1. Download `Brand.Studio-Windows-0.2.1-Setup.exe`.
+1. Download `Brand.Studio-Windows-0.2.2-Setup.exe`.
 2. Open the downloaded installer.
 3. Choose an installation folder and complete the setup.
 4. Launch Brand Studio from the Start menu or its shortcut.
@@ -100,8 +100,8 @@ GitHub Actions publishes the unsigned Windows setup installer when a version
 tag is pushed:
 
 ```bash
-git tag v0.2.1
-git push origin v0.2.1
+git tag v0.2.2
+git push origin v0.2.2
 ```
 
 The workflow uploads only `Brand Studio-Windows-<version>-Setup.exe` to the

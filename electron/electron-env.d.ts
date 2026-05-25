@@ -28,7 +28,7 @@ interface Window {
 			request: import("../src/native/contracts").NativeBridgeRequest,
 		) => Promise<import("../src/native/contracts").NativeBridgeResponse<TData>>;
 		getSources: (opts: Electron.SourcesOptions) => Promise<ProcessedDesktopSource[]>;
-		switchToEditor: () => Promise<void>;
+		openCompletedRecording: () => Promise<void>;
 		switchToHud: () => Promise<void>;
 		openScreenStudio: () => Promise<{ success: boolean }>;
 		consumeAuthCallbackUrl: () => Promise<string | null>;

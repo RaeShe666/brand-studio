@@ -1218,7 +1218,7 @@ async function loadRecordedSessionForVideoPath(
 }
 
 export function registerIpcHandlers(
-	createEditorWindow: () => void,
+	openCompletedRecordingWindow: () => void,
 	createSourceSelectorWindow: () => BrowserWindow,
 	createCountdownOverlayWindow: () => BrowserWindow,
 	getMainWindow: () => BrowserWindow | null,
@@ -1387,12 +1387,12 @@ export function registerIpcHandlers(
 		return { opened: true };
 	});
 
-	ipcMain.handle("switch-to-editor", () => {
+	ipcMain.handle("open-completed-recording", () => {
 		const mainWin = getMainWindow();
 		if (mainWin) {
 			mainWin.close();
 		}
-		createEditorWindow();
+		openCompletedRecordingWindow();
 	});
 
 	ipcMain.handle("switch-to-hud", () => {

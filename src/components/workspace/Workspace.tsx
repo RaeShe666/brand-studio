@@ -1,5 +1,7 @@
-import { type ChangeEvent, type CSSProperties, useRef, useState } from "react";
+import { type ChangeEvent, type CSSProperties, useEffect, useRef, useState } from "react";
+import type { RecordingSession } from "../../lib/recordingSession";
 import { AssetWorkspace } from "../assets/AssetWorkspace";
+import { toFileUrl } from "../video-editor/projectPersistence";
 import "./Workspace.css";
 
 type WorkspaceModule = "screen-studio" | "asset";
@@ -65,6 +67,14 @@ const TOOLS: Array<{ id: ToolId; label: string; icon: IconName }> = [
 	{ id: "cmd", label: "Shortcuts", icon: "cmd" },
 ];
 const WEBCAM_SHAPES = ["Circle", "Rounded", "Square", "Rectangle"];
+
+function formatTime(seconds: number) {
+	if (!Number.isFinite(seconds) || seconds < 0) return "0:00";
+	const totalSeconds = Math.floor(seconds);
+	const minutes = Math.floor(totalSeconds / 60);
+	const remainder = totalSeconds % 60;
+	return `${minutes}:${String(remainder).padStart(2, "0")}`;
+}
 
 function Icon({ name, size = 18 }: { name: IconName; size?: number }) {
 	const common = {
@@ -250,7 +260,12 @@ export function Workspace() {
 	const [activeTool, setActiveTool] = useState<ToolId>("select");
 	const [playbackRate, setPlaybackRate] = useState(1);
 	const [openingRecorder, setOpeningRecorder] = useState(false);
+	const [recordingSession, setRecordingSession] = useState<RecordingSession | null>(null);
+	const [isPlaying, setIsPlaying] = useState(false);
+	const [currentTime, setCurrentTime] = useState(0);
+	const [duration, setDuration] = useState(0);
 	const bgInputRef = useRef<HTMLInputElement>(null);
+	const videoRef = useRef<HTMLVideoElement>(null);
 
 	const aspect = ASPECTS.find((entry) => entry.id === aspectId) ?? ASPECTS[0];
 	const background =
@@ -267,6 +282,34 @@ export function Workspace() {
 		"--studio-bg-blur": `${bgBlur}px`,
 		"--studio-aspect": `${aspect.value}`,
 	} as CSSProperties;
+	const videoUrl = recordingSession ? toFileUrl(recordingSession.screenVideoPath) : null;
+
+	useEffect(() => {
+		let cancelled = false;
+		void (async () => {
+			const result = await window.electronAPI.getCurrentRecordingSession();
+			if (result.success && result.session) {
+				if (!cancelled) setRecordingSession(result.session);
+				return;
+			}
+			const pathResult = await window.electronAPI.getCurrentVideoPath();
+			if (!cancelled && pathResult.success && pathResult.path) {
+				setRecordingSession({
+					screenVideoPath: pathResult.path,
+					createdAt: Date.now(),
+				});
+			}
+		})();
+		return () => {
+			cancelled = true;
+		};
+	}, []);
+
+	useEffect(() => {
+		if (videoRef.current) {
+			videoRef.current.playbackRate = playbackRate;
+		}
+	}, [playbackRate]);
 
 	const openRecorder = async () => {
 		setOpeningRecorder(true);
@@ -275,6 +318,22 @@ export function Workspace() {
 		} finally {
 			setOpeningRecorder(false);
 		}
+	};
+
+	const togglePlayback = async () => {
+		const video = videoRef.current;
+		if (!videoUrl || !video) return;
+		if (video.paused) {
+			await video.play();
+		} else {
+			video.pause();
+		}
+	};
+
+	const seekBy = (seconds: number) => {
+		const video = videoRef.current;
+		if (!videoUrl || !video) return;
+		video.currentTime = Math.max(0, Math.min(video.duration || 0, video.currentTime + seconds));
 	};
 
 	const uploadBackground = (event: ChangeEvent<HTMLInputElement>) => {
@@ -376,6 +435,18 @@ export function Workspace() {
 											Press <em>Record</em> above to capture a screen, window, or browser tab.
 										</small>
 									</div>
+									{videoUrl && (
+										<video
+											ref={videoRef}
+											className="se-recording-video"
+											src={videoUrl}
+											onLoadedMetadata={(event) => setDuration(event.currentTarget.duration)}
+											onTimeUpdate={(event) => setCurrentTime(event.currentTarget.currentTime)}
+											onPlay={() => setIsPlaying(true)}
+											onPause={() => setIsPlaying(false)}
+											onEnded={() => setIsPlaying(false)}
+										/>
+									)}
 									{showCamera && (
 										<div className={`se-webcam-preview shape-${webcamShape.toLowerCase()}`} />
 									)}
@@ -583,16 +654,36 @@ export function Workspace() {
 								</button>
 							</div>
 							<div className="se-playback">
-								<button className="se-trans-btn" type="button" disabled>
+								<button
+									className="se-trans-btn"
+									type="button"
+									disabled={!videoUrl}
+									onClick={() => seekBy(-5)}
+									aria-label="Rewind 5 seconds"
+								>
 									<Icon name="rewind" />
 								</button>
-								<button className="se-play-btn" type="button" disabled>
+								<button
+									className="se-play-btn"
+									type="button"
+									disabled={!videoUrl}
+									onClick={() => void togglePlayback()}
+									aria-label={isPlaying ? "Pause recording" : "Play recording"}
+								>
 									<Icon name="play" />
 								</button>
-								<button className="se-trans-btn" type="button" disabled>
+								<button
+									className="se-trans-btn"
+									type="button"
+									disabled={!videoUrl}
+									onClick={() => seekBy(5)}
+									aria-label="Forward 5 seconds"
+								>
 									<Icon name="fwd" />
 								</button>
-								<span className="se-time">0:00 / 0:00</span>
+								<span className="se-time">
+									{formatTime(currentTime)} / {formatTime(duration)}
+								</span>
 							</div>
 							<div className="se-transport-right">
 								<button className="se-trans-btn ghost" type="button" disabled>
@@ -628,7 +719,8 @@ export function Workspace() {
 									))}
 								</div>
 								<span className="se-track-label">
-									<Icon name="link" size={12} /> Clip - 0:00 - 1.00x
+									<Icon name="link" size={12} /> Clip - {formatTime(duration)} -{" "}
+									{playbackRate.toFixed(2)}x
 								</span>
 							</div>
 							<div className="se-track zoom">

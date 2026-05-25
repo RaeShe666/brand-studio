@@ -31,8 +31,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
 	getSources: async (opts: Electron.SourcesOptions) => {
 		return await ipcRenderer.invoke("get-sources", opts);
 	},
-	switchToEditor: () => {
-		return ipcRenderer.invoke("switch-to-editor");
+	openCompletedRecording: () => {
+		return ipcRenderer.invoke("open-completed-recording");
 	},
 	switchToHud: () => {
 		return ipcRenderer.invoke("switch-to-hud");

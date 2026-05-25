@@ -440,6 +440,15 @@ function createEditorWindowWrapper() {
 	});
 }
 
+function createCompletedRecordingWorkspaceWindow() {
+	if (mainWindow && !mainWindow.isDestroyed()) {
+		isForceClosing = true;
+		mainWindow.close();
+		isForceClosing = false;
+	}
+	mainWindow = createWorkspaceWindow();
+}
+
 function createSourceSelectorWindowWrapper() {
 	sourceSelectorWindow = createSourceSelectorWindow();
 	sourceSelectorWindow.on("closed", () => {
@@ -583,7 +592,7 @@ app.whenReady().then(async () => {
 	});
 
 	registerIpcHandlers(
-		createEditorWindowWrapper,
+		createCompletedRecordingWorkspaceWindow,
 		createSourceSelectorWindowWrapper,
 		createCountdownOverlayWindowWrapper,
 		() => mainWindow,
