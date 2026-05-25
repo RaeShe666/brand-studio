@@ -37,6 +37,9 @@ contextBridge.exposeInMainWorld("electronAPI", {
 	switchToHud: () => {
 		return ipcRenderer.invoke("switch-to-hud");
 	},
+	openScreenStudio: () => {
+		return ipcRenderer.invoke("open-screen-studio");
+	},
 	startNewRecording: () => {
 		return ipcRenderer.invoke("start-new-recording");
 	},

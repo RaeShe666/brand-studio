@@ -18,6 +18,51 @@ const ASSET_BASE_URL_ARG = `--asset-base-url=${pathToFileURL(`${ASSET_BASE_DIR}$
 
 let hudOverlayWindow: BrowserWindow | null = null;
 
+/**
+ * Creates the primary product workspace shown on launch. Screen Studio hands
+ * off to the existing recorder HUD; Asset is hosted in this main shell.
+ */
+export function createWorkspaceWindow(): BrowserWindow {
+	const isMac = process.platform === "darwin";
+
+	const win = new BrowserWindow({
+		width: 1360,
+		height: 860,
+		minWidth: 1040,
+		minHeight: 680,
+		...(isMac && {
+			titleBarStyle: "hiddenInset",
+			trafficLightPosition: { x: 14, y: 14 },
+		}),
+		transparent: false,
+		resizable: true,
+		alwaysOnTop: false,
+		skipTaskbar: false,
+		title: "Brand Studio",
+		backgroundColor: "#f7f6f2",
+		autoHideMenuBar: true,
+		show: !HEADLESS,
+		webPreferences: {
+			preload: path.join(__dirname, "preload.mjs"),
+			additionalArguments: [ASSET_BASE_URL_ARG],
+			nodeIntegration: false,
+			contextIsolation: true,
+			backgroundThrottling: false,
+		},
+	});
+	win.setMenuBarVisibility(false);
+
+	if (VITE_DEV_SERVER_URL) {
+		win.loadURL(VITE_DEV_SERVER_URL + "?windowType=workspace");
+	} else {
+		win.loadFile(path.join(RENDERER_DIST, "index.html"), {
+			query: { windowType: "workspace" },
+		});
+	}
+
+	return win;
+}
+
 ipcMain.on("hud-overlay-hide", () => {
 	if (hudOverlayWindow && !hudOverlayWindow.isDestroyed()) {
 		hudOverlayWindow.minimize();
@@ -136,6 +181,7 @@ export function createEditorWindow(): BrowserWindow {
 		skipTaskbar: false,
 		title: "Brand Studio",
 		backgroundColor: "#000000",
+		autoHideMenuBar: true,
 		show: !HEADLESS,
 		webPreferences: {
 			preload: path.join(__dirname, "preload.mjs"),
@@ -146,6 +192,7 @@ export function createEditorWindow(): BrowserWindow {
 			backgroundThrottling: false,
 		},
 	});
+	win.setMenuBarVisibility(false);
 
 	// Maximize the window by default
 	win.maximize();

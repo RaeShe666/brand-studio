@@ -18,6 +18,7 @@ import {
 	createEditorWindow,
 	createHudOverlayWindow,
 	createSourceSelectorWindow,
+	createWorkspaceWindow,
 } from "./windows";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -89,7 +90,7 @@ const defaultTrayIcon = getTrayIcon("openscreen.png", trayIconSize);
 const recordingTrayIcon = getTrayIcon("rec-button.png", trayIconSize);
 
 function createWindow() {
-	mainWindow = createHudOverlayWindow();
+	mainWindow = createWorkspaceWindow();
 }
 
 function showMainWindow() {
@@ -527,8 +528,13 @@ app.whenReady().then(async () => {
 			isForceClosing = false;
 			mainWindow = null;
 		}
-		showMainWindow();
+		mainWindow = createHudOverlayWindow();
 	}
+
+	ipcMain.handle("open-screen-studio", () => {
+		switchToHudWrapper();
+		return { success: true };
+	});
 
 	registerIpcHandlers(
 		createEditorWindowWrapper,

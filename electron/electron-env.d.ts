@@ -30,6 +30,7 @@ interface Window {
 		getSources: (opts: Electron.SourcesOptions) => Promise<ProcessedDesktopSource[]>;
 		switchToEditor: () => Promise<void>;
 		switchToHud: () => Promise<void>;
+		openScreenStudio: () => Promise<{ success: boolean }>;
 		startNewRecording: () => Promise<{ success: boolean; error?: string }>;
 		openSourceSelector: () => Promise<{
 			opened: boolean;

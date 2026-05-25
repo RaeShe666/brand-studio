@@ -1,9 +1,12 @@
 import { lazy, Suspense, useEffect, useState } from "react";
+import { AuthProvider, useAuth } from "./components/auth/AuthContext";
+import { LoginPage } from "./components/auth/LoginPage";
 import { CountdownOverlay } from "./components/launch/CountdownOverlay.tsx";
 import { LaunchWindow } from "./components/launch/LaunchWindow";
 import { SourceSelector } from "./components/launch/SourceSelector";
 import { Toaster } from "./components/ui/sonner";
 import { TooltipProvider } from "./components/ui/tooltip";
+import { Workspace } from "./components/workspace/Workspace";
 import { ShortcutsProvider } from "./contexts/ShortcutsContext";
 import { loadAllCustomFonts } from "./lib/customFonts";
 
@@ -13,6 +16,16 @@ const ShortcutsConfigDialog = lazy(() =>
 		default: module.ShortcutsConfigDialog,
 	})),
 );
+
+function AuthenticatedWorkspace() {
+	const { loading, user } = useAuth();
+
+	if (loading) {
+		return <div className="h-screen bg-[#1a1a1a]" />;
+	}
+
+	return user ? <Workspace /> : <LoginPage />;
+}
 
 export default function App() {
 	const [windowType, setWindowType] = useState(
@@ -70,11 +83,12 @@ export default function App() {
 						</Suspense>
 					</ShortcutsProvider>
 				);
+			case "workspace":
 			default:
 				return (
-					<div className="w-full h-full bg-background text-foreground">
-						<h1>Brand Studio</h1>
-					</div>
+					<AuthProvider>
+						<AuthenticatedWorkspace />
+					</AuthProvider>
 				);
 		}
 	})();
