@@ -8,6 +8,10 @@ const APP_ROOT = path.join(__dirname, "..");
 const VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
 const RENDERER_DIST = path.join(APP_ROOT, "dist");
 const HEADLESS = process.env["HEADLESS"] === "true";
+const APP_ICON_PATH = path.join(
+	process.defaultApp ? path.join(__dirname, "..", "public") : RENDERER_DIST,
+	"logo-home-transparent.png",
+);
 
 // Asset base URL for renderer (wallpapers, etc.). Packaged: extraResources copies
 // public/wallpapers -> resources/wallpapers. Unpackaged: <appRoot>/public/.
@@ -42,6 +46,7 @@ export function createWorkspaceWindow(): BrowserWindow {
 		backgroundColor: "#f7f6f2",
 		autoHideMenuBar: true,
 		show: !HEADLESS,
+		icon: APP_ICON_PATH,
 		webPreferences: {
 			preload: path.join(__dirname, "preload.mjs"),
 			additionalArguments: [ASSET_BASE_URL_ARG],
@@ -180,6 +185,7 @@ export function createEditorWindow(): BrowserWindow {
 		alwaysOnTop: false,
 		skipTaskbar: false,
 		title: "Brand Studio",
+		icon: APP_ICON_PATH,
 		backgroundColor: "#000000",
 		autoHideMenuBar: true,
 		show: !HEADLESS,
@@ -231,6 +237,7 @@ export function createSourceSelectorWindow(): BrowserWindow {
 		alwaysOnTop: true,
 		transparent: true,
 		backgroundColor: "#00000000",
+		icon: APP_ICON_PATH,
 		webPreferences: {
 			preload: path.join(__dirname, "preload.mjs"),
 			additionalArguments: [ASSET_BASE_URL_ARG],
@@ -283,6 +290,7 @@ export function createCountdownOverlayWindow(): BrowserWindow {
 		backgroundColor: "#00000000",
 		hasShadow: false,
 		show: false,
+		icon: APP_ICON_PATH,
 		webPreferences: {
 			preload: path.join(__dirname, "preload.mjs"),
 			additionalArguments: [ASSET_BASE_URL_ARG],

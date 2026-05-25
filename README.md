@@ -17,12 +17,12 @@ The app is built with Electron, React, Vite, and electron-builder. Its recording
 
 The current Windows release is available from GitHub:
 
-- [Download Brand Studio v0.1.0 for Windows](https://github.com/RaeShe666/brand-studio/releases/download/v0.1.0/Brand.Studio-Windows-0.1.0-Setup.exe)
+- [Download Brand Studio v0.2.0 for Windows](https://github.com/RaeShe666/brand-studio/releases/download/v0.2.0/Brand.Studio-Windows-0.2.0-Setup.exe)
 - [View all releases](https://github.com/RaeShe666/brand-studio/releases)
 
 To install:
 
-1. Download `Brand.Studio-Windows-0.1.0-Setup.exe`.
+1. Download `Brand.Studio-Windows-0.2.0-Setup.exe`.
 2. Open the downloaded installer.
 3. Choose an installation folder and complete the setup.
 4. Launch Brand Studio from the Start menu or its shortcut.
@@ -100,8 +100,8 @@ GitHub Actions publishes the unsigned Windows setup installer when a version
 tag is pushed:
 
 ```bash
-git tag v0.1.0
-git push origin v0.1.0
+git tag v0.2.0
+git push origin v0.2.0
 ```
 
 The workflow uploads only `Brand Studio-Windows-<version>-Setup.exe` to the

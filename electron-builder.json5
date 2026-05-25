@@ -81,7 +81,7 @@
     "target": [
       "nsis"
     ],
-    "icon": "icons/icons/win/icon.ico",
+    "icon": "public/logo-home-transparent.png",
     "artifactName": "${productName}-Windows-${version}-Setup.${ext}",
     "extraResources": [
       {
