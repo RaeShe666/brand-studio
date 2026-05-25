@@ -69,6 +69,17 @@ brandstudio://auth/callback
 Google sign-in opens in the user's default browser and returns to the desktop
 app through this registered protocol.
 
+Windows release builds require these GitHub repository secrets:
+
+```txt
+VITE_SUPABASE_URL
+VITE_SUPABASE_ANON_KEY
+```
+
+They must match the public Supabase frontend configuration used by the
+SYL.AILABS website. The release workflow supplies
+`VITE_API_URL=https://api.sylailabs.com` automatically.
+
 ## Windows Build
 
 The Windows recorder uses a native WGC helper generated during the packaged build. Building locally requires Visual Studio Build Tools 2022 with C++ tools and the CMake component.
