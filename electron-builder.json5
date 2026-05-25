@@ -8,6 +8,12 @@
     "**/*.node"
   ],
   "productName": "Brand Studio",
+  "protocols": [
+    {
+      "name": "Brand Studio Authentication",
+      "schemes": ["brandstudio"]
+    }
+  ],
   "npmRebuild": true,
   "buildDependenciesFromSource": true,
   "compression": "normal",

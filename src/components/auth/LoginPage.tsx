@@ -1,4 +1,4 @@
-import { type FormEvent, useState } from "react";
+import { type FormEvent, useEffect, useState } from "react";
 import { hasSupabaseConfig } from "../assets/supabaseClient";
 import { useAuth } from "./AuthContext";
 import "./LoginPage.css";
@@ -12,7 +12,12 @@ export function LoginPage() {
 	const [submitting, setSubmitting] = useState(false);
 	const [error, setError] = useState("");
 	const [message, setMessage] = useState("");
-	const { signInWithEmail, signInWithGoogle, signUpWithEmail } = useAuth();
+	const { authError, clearAuthError, signInWithEmail, signInWithGoogle, signUpWithEmail } =
+		useAuth();
+
+	useEffect(() => {
+		if (authError) setError(authError);
+	}, [authError]);
 
 	const submit = async (event: FormEvent) => {
 		event.preventDefault();
@@ -35,6 +40,7 @@ export function LoginPage() {
 
 	const googleSignIn = async () => {
 		setError("");
+		clearAuthError();
 		try {
 			await signInWithGoogle();
 		} catch (googleError) {

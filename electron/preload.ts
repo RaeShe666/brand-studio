@@ -40,6 +40,14 @@ contextBridge.exposeInMainWorld("electronAPI", {
 	openScreenStudio: () => {
 		return ipcRenderer.invoke("open-screen-studio");
 	},
+	consumeAuthCallbackUrl: () => {
+		return ipcRenderer.invoke("consume-auth-callback-url");
+	},
+	onAuthCallbackReady: (callback: () => void) => {
+		const listener = () => callback();
+		ipcRenderer.on("auth-callback-ready", listener);
+		return () => ipcRenderer.removeListener("auth-callback-ready", listener);
+	},
 	startNewRecording: () => {
 		return ipcRenderer.invoke("start-new-recording");
 	},

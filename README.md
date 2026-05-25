@@ -57,6 +57,18 @@ Start the desktop app:
 npm run dev
 ```
 
+### Authentication
+
+Brand Studio uses the same Supabase authentication as the SYL.AILABS website.
+For Google sign-in, add this URL to the Supabase Auth redirect allow list:
+
+```txt
+brandstudio://auth/callback
+```
+
+Google sign-in opens in the user's default browser and returns to the desktop
+app through this registered protocol.
+
 ## Windows Build
 
 The Windows recorder uses a native WGC helper generated during the packaged build. Building locally requires Visual Studio Build Tools 2022 with C++ tools and the CMake component.

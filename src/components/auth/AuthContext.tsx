@@ -3,6 +3,8 @@ import { createContext, type ReactNode, useContext, useEffect, useMemo, useState
 import { hasSupabaseConfig, supabase } from "../assets/supabaseClient";
 
 interface AuthContextValue {
+	authError: string;
+	clearAuthError: () => void;
 	loading: boolean;
 	signInWithEmail: (email: string, password: string) => Promise<void>;
 	signInWithGoogle: () => Promise<void>;
@@ -16,6 +18,7 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
 	const [user, setUser] = useState<User | null>(null);
 	const [loading, setLoading] = useState(true);
+	const [authError, setAuthError] = useState("");
 
 	useEffect(() => {
 		if (!hasSupabaseConfig) {
@@ -34,14 +37,69 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 		return () => data.subscription.unsubscribe();
 	}, []);
 
+	useEffect(() => {
+		const completeGoogleSignIn = async () => {
+			const callbackUrl = await window.electronAPI.consumeAuthCallbackUrl();
+			if (!callbackUrl) return;
+			const url = new URL(callbackUrl);
+			const fragment = new URLSearchParams(url.hash.replace(/^#/, ""));
+			const callbackError =
+				url.searchParams.get("error_description") ||
+				fragment.get("error_description") ||
+				url.searchParams.get("error") ||
+				fragment.get("error");
+			if (callbackError) {
+				setAuthError(callbackError);
+				return;
+			}
+
+			const code = url.searchParams.get("code");
+			if (code) {
+				const { error } = await supabase.auth.exchangeCodeForSession(code);
+				if (error) setAuthError(error.message);
+				return;
+			}
+
+			const accessToken = fragment.get("access_token");
+			const refreshToken = fragment.get("refresh_token");
+			if (!accessToken || !refreshToken) {
+				setAuthError("Google sign-in returned without a usable session.");
+				return;
+			}
+
+			const { error } = await supabase.auth.setSession({
+				access_token: accessToken,
+				refresh_token: refreshToken,
+			});
+			if (error) setAuthError(error.message);
+		};
+
+		const unsubscribe = window.electronAPI.onAuthCallbackReady(() => {
+			void completeGoogleSignIn();
+		});
+		void completeGoogleSignIn();
+		return unsubscribe;
+	}, []);
+
 	const value = useMemo<AuthContextValue>(
 		() => ({
+			authError,
+			clearAuthError: () => setAuthError(""),
 			loading,
 			user,
 			signInWithGoogle: async () => {
-				throw new Error(
-					"Google sign-in for the desktop app will be connected in a later delivery.",
-				);
+				setAuthError("");
+				const { data, error } = await supabase.auth.signInWithOAuth({
+					provider: "google",
+					options: {
+						redirectTo: "brandstudio://auth/callback",
+						skipBrowserRedirect: true,
+					},
+				});
+				if (error) throw error;
+				if (!data.url) throw new Error("Google sign-in URL was not returned.");
+				const result = await window.electronAPI.openExternalUrl(data.url);
+				if (!result.success) throw new Error(result.error || "Could not open Google sign-in.");
 			},
 			signInWithEmail: async (email, password) => {
 				const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -60,7 +118,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 				if (error) throw error;
 			},
 		}),
-		[loading, user],
+		[authError, loading, user],
 	);
 
 	return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

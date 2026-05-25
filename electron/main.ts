@@ -22,8 +22,16 @@ import {
 } from "./windows";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const AUTH_PROTOCOL = "brandstudio";
+let pendingAuthCallbackUrl: string | null = null;
 
 app.setName("Brand Studio");
+
+if (process.defaultApp && process.argv.length >= 2) {
+	app.setAsDefaultProtocolClient(AUTH_PROTOCOL, process.execPath, [path.resolve(process.argv[1])]);
+} else {
+	app.setAsDefaultProtocolClient(AUTH_PROTOCOL);
+}
 
 // Use Screen & System Audio Recording permissions instead of CoreAudio Tap API on macOS.
 // CoreAudio Tap requires NSAudioCaptureUsageDescription in the parent app's Info.plist,
@@ -105,6 +113,39 @@ function showMainWindow() {
 
 	createWindow();
 }
+
+function findAuthCallbackUrl(args: string[]) {
+	return args.find((arg) => arg.startsWith(`${AUTH_PROTOCOL}://auth/callback`)) ?? null;
+}
+
+function receiveAuthCallback(url: string) {
+	pendingAuthCallbackUrl = url;
+	if (!app.isReady()) return;
+	showMainWindow();
+	if (mainWindow && !mainWindow.isDestroyed()) {
+		mainWindow.webContents.send("auth-callback-ready");
+	}
+}
+
+const hasSingleInstanceLock = app.requestSingleInstanceLock();
+if (!hasSingleInstanceLock) {
+	app.quit();
+} else {
+	app.on("second-instance", (_event, commandLine) => {
+		const callbackUrl = findAuthCallbackUrl(commandLine);
+		if (callbackUrl) {
+			receiveAuthCallback(callbackUrl);
+			return;
+		}
+		showMainWindow();
+	});
+}
+
+app.on("open-url", (event, url) => {
+	if (!url.startsWith(`${AUTH_PROTOCOL}://auth/callback`)) return;
+	event.preventDefault();
+	receiveAuthCallback(url);
+});
 
 function isEditorWindow(window: BrowserWindow) {
 	return window.webContents.getURL().includes("windowType=editor");
@@ -514,6 +555,11 @@ app.whenReady().then(async () => {
 		setupApplicationMenu();
 		updateTrayMenu();
 	});
+	ipcMain.handle("consume-auth-callback-url", () => {
+		const callbackUrl = pendingAuthCallbackUrl;
+		pendingAuthCallbackUrl = null;
+		return callbackUrl;
+	});
 
 	createTray();
 	updateTrayMenu();
@@ -554,4 +600,8 @@ app.whenReady().then(async () => {
 		switchToHudWrapper,
 	);
 	createWindow();
+	const startupAuthCallbackUrl = findAuthCallbackUrl(process.argv);
+	if (startupAuthCallbackUrl) {
+		receiveAuthCallback(startupAuthCallbackUrl);
+	}
 });

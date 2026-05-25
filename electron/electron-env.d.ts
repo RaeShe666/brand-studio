@@ -31,6 +31,8 @@ interface Window {
 		switchToEditor: () => Promise<void>;
 		switchToHud: () => Promise<void>;
 		openScreenStudio: () => Promise<{ success: boolean }>;
+		consumeAuthCallbackUrl: () => Promise<string | null>;
+		onAuthCallbackReady: (callback: () => void) => () => void;
 		startNewRecording: () => Promise<{ success: boolean; error?: string }>;
 		openSourceSelector: () => Promise<{
 			opened: boolean;
